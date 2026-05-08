@@ -1,17 +1,21 @@
 import os
-from typing import List, Union
-from pydantic import AnyHttpUrl, validator
+from typing import List
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Finance RAG Platform"
     API_V1_STR: str = "/api/v1"
     
-    # BACKEND_CORS_ORIGINS is a comma-separated list of origins
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = [
-        "http://localhost:3000",
-        "http://localhost:8000",
-    ]
+    # BACKEND_CORS_ORIGINS as comma-separated string
+    BACKEND_CORS_ORIGINS: str = "http://localhost:3000,http://localhost:8000"
+
+    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v):
+        if isinstance(v, str):
+            return v
+        return ",".join(v) if isinstance(v, list) else str(v)
 
     # JWT
     JWT_SECRET: str = "your_super_secret_jwt_key_change_me_in_prod"
