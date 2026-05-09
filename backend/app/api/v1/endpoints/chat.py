@@ -1,32 +1,23 @@
-import httpx
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from app.services.rag import rag_pipeline
 
 router = APIRouter()
 
 class ChatRequest(BaseModel):
     message: str
 
-@router.post("/query")
-async def query(req: ChatRequest):
-    try:
-        async with httpx.AsyncClient() as client:
-            # We assume Ollama is running locally on port 11434 with llama3
-            response = await client.post(
-                "http://localhost:11434/api/generate",
-                json={
-                    "model": "llama3",
-                    "prompt": req.message,
-                    "stream": False
-                },
-                timeout=60.0
-            )
-            response.raise_for_status()
-            data = response.json()
-            return {"reply": data.get("response", "No response from AI")}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to communicate with Ollama: {str(e)}")
+class ChatResponse(BaseModel):
+    reply: str
+
+@router.post("/query", response_model=ChatResponse)
+async def query_chat(request: ChatRequest):
+    if not request.message.strip():
+        raise HTTPException(status_code=400, detail="Message cannot be empty")
+
+    response = await rag_pipeline.generate_response(request.message)
+    return {"reply": response}
 
 @router.get("/history")
-async def history():
-    return {"message": "Chat history"}
+async def get_history():
+    return {"messages": []}

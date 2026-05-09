@@ -22,8 +22,8 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440
     
-    # Postgres
-    DATABASE_URL: str = "postgresql+asyncpg://user:password@localhost:5432/finance_rag"
+    # Postgres/SQLite
+    DATABASE_URL: str = "sqlite+aiosqlite:///./finance_rag.db"
     
     # Redis
     REDIS_URL: str = "redis://localhost:6379/0"
@@ -41,6 +41,10 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = ""
     FINNHUB_API_KEY: str = ""
     ALPHA_VANTAGE_API_KEY: str = ""
+    
+    # Ollama
+    OLLAMA_BASE_URL: str = "http://localhost:11434"
+    OLLAMA_MODEL: str = "llama3"
 
     class Config:
         case_sensitive = True
